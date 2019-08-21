@@ -1,2 +1,6 @@
 # IvanSScrobot_microservices
-IvanSScrobot microservices repository
+
+
+## HW#12 Docker. Practice #2.
+
+**0. Preparation:**
