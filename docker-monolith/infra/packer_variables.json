@@ -1,0 +1,6 @@
+{
+	"gc_project_id": "docker-is",
+	"gc_source_image_family": "reddit-base",
+	"gc_image_description": "A test image with docker" 
+}
+

@@ -1,0 +1,13 @@
+plugin: gcp_compute             # name the plugin you want to use (use `ansible-doc -t inventory -l` to list available plugins)
+projects:
+  - docker-is           # Id of your gcp project
+#regions:                        # regions from your project you want to fetch inventory from (you can also use zones instead of regions if you target one or several specific zones)        
+#  - europe-west1-b
+groups:
+  app: "'app' in name"
+
+#hostnames:                # A list of options that describe the ordering for which hostnames should be assigned. Currently supported hostnames are 'public_ip', 'private_ip', or 'name'.
+#  - name
+filters: []
+auth_kind: serviceaccount       # gcp authentication kind. with service account you should provide the service account json key file to authenticate
+service_account_file: service_account_file.json   # Service account json keyfile
