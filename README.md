@@ -22,7 +22,7 @@ docker volume create reddit_db
 docker run -d --network=reddit --network-alias=post_db \
 --network-alias=comment_db -v reddit_db:/data/db mongo:latest
 ```
-Now we can kill containers ` docker kill $(docker ps -q)` and save posts in the database.
+Now we can kill containers ` docker kill $(docker ps -q)` and posts in the database will be saved.
 
 
 ## HW#12 Docker. Practice #2.
