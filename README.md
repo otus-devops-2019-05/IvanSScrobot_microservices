@@ -4,7 +4,7 @@
 
 **1. Preparations and the tasks (including those with \*):**
 
-Decompose our applivcation into 3 components, write Dockerfile for each of them. Create a bridge-network for the new containers, start containers with network aliases. Below commands for starting containers with alternative aliases, which in our case requires environmetn variables passed to docker:
+Decompose our applivcation into 3 components, write Dockerfile for each of them. Create a bridge-network for the new containers, start containers with network aliases. Below commands for starting containers with alternative aliases, which in our case requires environment variables passed to docker:
 ```
 docker network create reddit
 docker run -d --network=reddit --network-alias=post_db --network-alias=mongo_db mongo:latest
@@ -22,6 +22,8 @@ docker volume create reddit_db
 docker run -d --network=reddit --network-alias=post_db \
 --network-alias=comment_db -v reddit_db:/data/db mongo:latest
 ```
+Now we can kill containers ` docker kill $(docker ps -q)` and save posts in the database.
+
 
 ## HW#12 Docker. Practice #2.
 
