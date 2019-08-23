@@ -1,5 +1,27 @@
 # IvanSScrobot_microservices
 
+## HW#13 Docker. Practice #3.
+
+**1. Preparations and the tasks (including those with \*):**
+
+Decompose our applivcation into 3 components, write Dockerfile for each of them. Create a bridge-network for the new containers, start containers with network aliases. Below commands for starting containers with alternative aliases, which in our case requires environmetn variables passed to docker:
+```
+docker network create reddit
+docker run -d --network=reddit --network-alias=post_db --network-alias=mongo_db mongo:latest
+docker run -d --network=reddit --network-alias=post ivansscrobot/post:1.0
+docker run  -e COMMENT_DATABASE_HOST='mongo_db' -d --network=reddit --network-alias=comment ivansscrobot/comment:1.0
+docker run -d --network=reddit -p 9292:9292 ivansscrobot/ui:1.0
+```
+**Note: Make sure put the container name after the environment variable, not before that.**
+
+Improve Dockerfile for ui part of the applications in order to make it smaller. I used `FROM ruby:2.4.6-alpine3.10` since this image is pretty light and has pre-installed packages for ruby.
+
+Use docker volume for Mongo:
+```
+docker volume create reddit_db
+docker run -d --network=reddit --network-alias=post_db \
+--network-alias=comment_db -v reddit_db:/data/db mongo:latest
+```
 
 ## HW#12 Docker. Practice #2.
 
