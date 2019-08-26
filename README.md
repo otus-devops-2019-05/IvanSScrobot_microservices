@@ -1,5 +1,12 @@
 # IvanSScrobot_microservices
 
+## HW#14 Docker. Practice #4
+
+
+Containers and app’s network are given a name based on the “project name”, which is based on the name of the directory it lives in ("src" in our case). It's possible to override the project name with either the `--project-name` flag or the `COMPOSE_PROJECT_NAME` environment variable.
+
+
+
 ## HW#13 Docker. Practice #3.
 
 **1. Preparations and the tasks (including those with \*):**

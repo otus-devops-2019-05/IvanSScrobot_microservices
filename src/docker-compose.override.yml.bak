@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  ui:
+    volumes:
+        - type: volume
+          source: ui
+          target: /app
+    command: "puma --debug -w 2"    
+  
+  comment:
+    volumes:
+      - type: volume
+        source: comment
+        target: /app
+    command: "puma --debug -w 2"  
+    
+  post:
+    volumes:
+      - type: volume
+        source: post_py
+        target: /app
+
+volumes:
+  post_py:
+    driver_opts:
+      type: none
+      device: /home/ivan/git/IvanSScrobot_microservices/src/post-py
+      o: bind
+
+  comment:
+    driver_opts:
+      type: none
+      device: /home/ivan/git/IvanSScrobot_microservices/src/comment
+      o: bind
+
+  ui:
+    driver_opts:
+      type: none
+      device: /home/ivan/git/IvanSScrobot_microservices/src/ui
+      o: bind
