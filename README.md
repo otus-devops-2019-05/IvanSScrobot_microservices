@@ -2,10 +2,72 @@
 
 ## HW#14 Docker. Practice #4
 
+**1. Preparations and the main task:**
+
+Try running containers in "none" network and in "host" one:
+```
+ docker run -ti --rm --network none joffotron/docker-net-tools -c ifconfig 
+ docker run -ti --rm --network host joffotron/docker-net-tools -c ifconfig 
+ ```
+Then, create "bridge"-network: `docker network create reddit --driver bridge `. For orgaizing a subnet, use ` --subnet=10.0.2.0/24` option. In order to add a container into several networks, use ` docker network connect front_net post`. 
+
+Bridge-utils helps to learn more about networks on a host (`docker network ls`, `brctl show <interface> `).
+
+**Docker-composer**
+
+Install with pip, official docs is [here](https://docs.docker.com/compose/). Write docker-compose.yml, export variables `export VARIABLE_NAME=<variable-value>`. Variables also can be placed in *`.env`* file. Docker-compose with aliases and additional variables looks something like this:
+```
+version: '3.3'
+services:
+  post_db:
+    image: mongo:3.2
+    volumes:
+      - post_db:/data/db
+    networks:
+      - back_net
+  ui:
+    build: ./ui
+    image: ${USERNAME}/ui:${UI_VERSION}
+    ports:
+      - ${APP_PORT}:9292/tcp
+    networks:
+      - front_net
+  post:
+    build: ./post-py
+    image: ${USERNAME}/post:${VERSION}
+    networks:
+      - front_net
+      - back_net
+  comment:
+    build: ./comment
+    image: ${USERNAME}/comment:${VERSION}
+    networks:
+      - front_net
+      - back_net
+
+volumes:
+  post_db:
+
+networks:
+  back_net:
+  front_net:
+  ```
 
 Containers and app’s network are given a name based on the “project name”, which is based on the name of the directory it lives in ("src" in our case). It's possible to override the project name with either the `--project-name` flag or the `COMPOSE_PROJECT_NAME` environment variable.
 
+**2. Additional tasks with \*:**
 
+docker-compose.override.yml can customize an environment (check [docs](https://docs.docker.com/compose/extends/)). In our case, it may look like:
+```
+version: '3.3'
+
+services:
+  ui:
+    #volumes:
+    #    - "./ui:/app"
+    command: "puma --debug -w 2"    
+```
+Volumes section is commented here as we run all command through docker-machine, `docker-compose up` is running on the remote host, and files from local path `"./ui/"` can't be mounted  there.
 
 ## HW#13 Docker. Practice #3.
 
