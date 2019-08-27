@@ -7,3 +7,4 @@ variables.json
 .terraform/
 venv/
 service_account_file.json
+.env
