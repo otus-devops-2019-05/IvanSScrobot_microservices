@@ -21,7 +21,7 @@ services:
       - back_net
   comment:
     build: ./comment
-    image: ${USERNAME}/comment:${VERSION}
+    image: ${USERNAME}/comment:${UI_VERSION}
     networks:
       - front_net
       - back_net
@@ -32,4 +32,3 @@ volumes:
 networks:
   back_net:
   front_net:
-  some_net:

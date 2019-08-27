@@ -11,7 +11,7 @@ Try running containers in "none" network and in "host" one:
  ```
 Then, create "bridge"-network: `docker network create reddit --driver bridge `. For orgaizing a subnet, use ` --subnet=10.0.2.0/24` option. In order to add a container into several networks, use ` docker network connect front_net post`. 
 
-Bridge-utils helps to learn more about networks on a host (`docker network ls`, `brctl show <interface> `).
+Bridge-utils helps to learn more about networks on a host (`docker network ls`, `brctl show <interface> `, `iptables -nL -t nat`).
 
 **Docker-composer**
 

@@ -9,7 +9,7 @@ services:
   comment:
     #volumes:
     #  - "./comment:/app" 
-    command: "puma --debug -w 2"  
+    #command: "puma --debug -w 2"  
     
   post:
     #volumes:
