@@ -3,8 +3,8 @@
   become: true
   vars:
     default_container_name: gitlab.example.com
-    default_container_image: gitlab/gitlab-ce:latest 
-
+    default_gitlab_image: gitlab/gitlab-ce:latest 
+    default_runner_image: gitlab/gitlab-runner:latest 
 
   tasks:
     - name: Install aptitude using apt
@@ -40,24 +40,24 @@
         - /srv/gitlab/config
         - /srv/gitlab/data
         - /srv/gitlab/logs  
-    
-    - name: Touch docker-compose.yml
-      file:
-        path: /srv/gitlab/docker-compose.yml
-        state: touch
-        mode: u=rw,g=r,o=r
 
-    # Pull image specified by variable default_image from the Docker Hub
-    - name: Pull default Docker image
+    # Pull gitlab image from the Docker Hub
+    - name: Pull gitlab Docker image
       docker_image:
-        name: "{{ default_container_image }}"
+        name: "{{ default_gitlab_image }}"
         source: pull
 
-    # Creates container, using default values
-    - name: Create default containers
+    # Pull runner image from the Docker Hub
+    - name: Pull runner Docker image
+      docker_image:
+        name: "{{ default_runner_image }}"
+        source: pull
+
+    # Creates gitlab container
+    - name: Create gitlab containers
       docker_container:
         name: "{{ default_container_name }}"
-        image: "{{ default_container_image }}"
+        image: "{{ default_gitlab_image }}"
         state: started
         restart: yes
         tty: yes
@@ -71,4 +71,15 @@
           - /srv/gitlab/data:/var/opt/gitlab
         env:
           GITLAB_OMNIBUS_CONFIG: external_url 'http://35.239.202.107'
-        
+ 
+  # Creates runner container
+    - name: Create runner containers
+      docker_container:
+        name: gitlab-runner
+        image: "{{ default_runner_image }}"
+        state: started
+        restart: yes
+        tty: yes
+        volumes:
+          - /srv/gitlab-runner/config:/etc/gitlab-runner
+          - /var/run/docker.sock:/var/run/docker.sock
