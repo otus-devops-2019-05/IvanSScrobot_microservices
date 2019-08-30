@@ -9,9 +9,15 @@ stages:
 
 variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
 before_script:
   - cd reddit
   - bundle install 
+
+services:
+    - name: docker:19.03-dind  
 
 build_job:
   stage: build
@@ -24,6 +30,7 @@ test_unit_job:
     - mongo:latest
   script:
     - ruby simpletest.rb 
+    - hostname
 
 test_integration_job:
   stage: test
@@ -35,13 +42,16 @@ deploy_dev_job:
   stage: review
   script:
     - echo 'Deploy'
+    - hostname
   environment:
     name: dev
     url: http://dev.example.com
 
 branch review:
   stage: review
-  script: echo "Deploy to $CI_ENVIRONMENT_SLUG"
+  script: 
+    - echo "Deploy to $CI_ENVIRONMENT_SLUG"
+    - hostname
   environment:
     name: branch/$CI_COMMIT_REF_NAME
     url: http://$CI_ENVIRONMENT_SLUG.example.com
@@ -57,6 +67,7 @@ staging:
     - /^\d+\.\d+\.\d+/
   script:
     - echo 'Deploy'
+    - hostname
   environment:
     name: stage
     url: https://beta.example.com 
@@ -68,6 +79,7 @@ production:
     - /^\d+\.\d+\.\d+/
   script:
    - echo 'Deploy'
+   - hostname
   environment:
     name: production
     url: https://example.com
