@@ -29,6 +29,7 @@ test_integration_job:
   stage: test
   script:
     - echo 'Testing 2'
+    - echo 'Check it' > /tmp/1.txt
 
 deploy_dev_job:
   stage: review
