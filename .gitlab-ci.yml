@@ -28,9 +28,6 @@ build_job:
     - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
     - docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
     - docker push ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
-  artifacts:
-    paths:
-      - reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID
 
 test_unit_job:
   stage: test
