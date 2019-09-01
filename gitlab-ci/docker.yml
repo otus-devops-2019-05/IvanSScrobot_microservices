@@ -70,7 +70,7 @@
           - /srv/gitlab/logs:/var/log/gitlab
           - /srv/gitlab/data:/var/opt/gitlab
         env:
-          GITLAB_OMNIBUS_CONFIG: external_url 'http://35.239.202.107'
+          GITLAB_OMNIBUS_CONFIG: external_url 'http://104.198.248.218'
  
   # Creates runner container
     - name: Create runner containers

@@ -10,19 +10,26 @@ stages:
 variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
   DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
 
 before_script:
   - cd reddit
   - bundle install 
 
-services:
-    - name: docker:19.03-dind  
 
 build_job:
+  image: docker:19.03
   stage: build
+  before_script:
+    - docker info
+    - echo 'CI_SERVER_HOST- '$CI_SERVER_HOST
+    - echo 'CI_COMMIT_REF_NAME- '$CI_COMMIT_REF_NAME
+    - echo 'CI_PIPELINE_IID - '$CI_PIPELINE_IID
   script:
-    - echo 'Building'
+    - docker build -t reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ./reddit
+    - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+  artifacts:
+    paths:
+      - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
 
 test_unit_job:
   stage: test
