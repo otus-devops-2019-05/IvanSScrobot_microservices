@@ -9,7 +9,6 @@ stages:
 
 variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
-  DOCKER_HOST: tcp://docker:2375
 
 before_script:
   - cd reddit
