@@ -74,11 +74,11 @@ branch review:
 staging:
   stage: stage
   when: manual
-  only:
-    - /^\d+\.\d+\.\d+/
+  #only:
+  #  - /^\d+\.\d+\.\d+/
   script:
-   # - echo 'Deploy'
-   # - hostname
+   - echo 'Deploy'
+   - hostname
   environment:
     name: stage
     url: https://beta.example.com 
