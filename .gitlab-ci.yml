@@ -26,11 +26,11 @@ build_job:
     - echo 'CI_COMMIT_REF_NAME- '$CI_COMMIT_REF_NAME
     - echo 'CI_PIPELINE_IID - '$CI_PIPELINE_IID
   script:
-    - docker build -t reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ./reddit
-    - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
-    - docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
-    - docker push ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
-
+   # - docker build -t reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ./reddit
+   # - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+   # - docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
+   # - docker push ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+     - docker info
 test_unit_job:
   stage: test
   tags:
