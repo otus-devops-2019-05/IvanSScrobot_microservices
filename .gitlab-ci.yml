@@ -18,6 +18,8 @@ before_script:
 build_job:
   image: docker:19.03
   stage: build
+  tags:
+    - docker-image
   before_script:
     - docker info
     - echo 'CI_SERVER_HOST- '$CI_SERVER_HOST
@@ -55,6 +57,8 @@ deploy_dev_job:
 branch review:
   image: docker:19.03
   stage: review
+  tags:
+    - docker-image
   script: 
     - echo 'CI_ENVIRONMENT_SLUG - '$CI_ENVIRONMENT_SLUG
     - echo "Deploy to $CI_ENVIRONMENT_SLUG"
@@ -73,8 +77,8 @@ staging:
   only:
     - /^\d+\.\d+\.\d+/
   script:
-    - echo 'Deploy'
-    - hostname
+   # - echo 'Deploy'
+   # - hostname
   environment:
     name: stage
     url: https://beta.example.com 
@@ -82,8 +86,8 @@ staging:
 production:
   stage: production
   when: manual
-  only:
-    - /^\d+\.\d+\.\d+/
+  #only:
+  #  - /^\d+\.\d+\.\d+/
   script:
    - echo 'Deploy'
    - hostname
