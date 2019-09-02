@@ -11,8 +11,8 @@ variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
 
 before_script:
-  - cd reddit
-  - bundle install 
+#  - cd reddit
+#  - bundle install 
 
 
 build_job:
@@ -33,6 +33,8 @@ build_job:
 
 test_unit_job:
   stage: test
+  tags:
+    - gce
   services:
     - mongo:latest
   script:
@@ -41,12 +43,16 @@ test_unit_job:
 
 test_integration_job:
   stage: test
+  tags:
+    - gce
   script:
     - echo 'Testing 2'
     - hostname
 
 deploy_dev_job:
   stage: review
+  tags:
+    - gce
   script:
     - echo 'Deploy'
     - hostname
@@ -74,6 +80,8 @@ branch review:
 staging:
   stage: stage
   when: manual
+  tags:
+    - gce
   #only:
   #  - /^\d+\.\d+\.\d+/
   script:
@@ -86,6 +94,8 @@ staging:
 production:
   stage: production
   when: manual
+  tags:
+    - gce
   #only:
   #  - /^\d+\.\d+\.\d+/
   script:
