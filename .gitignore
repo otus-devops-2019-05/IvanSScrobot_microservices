@@ -8,3 +8,4 @@ variables.json
 venv/
 service_account_file.json
 .env
+temp.txt

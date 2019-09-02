@@ -53,17 +53,19 @@ deploy_dev_job:
     url: http://dev.example.com
 
 branch review:
+  image: docker:19.03
   stage: review
   script: 
+    - echo 'CI_ENVIRONMENT_SLUG - '$CI_ENVIRONMENT_SLUG
     - echo "Deploy to $CI_ENVIRONMENT_SLUG"
-    - hostname
+    - docker run -d --name gitlab-reddit-$CI_COMMIT_REF_NAME-$CI_PIPELINE_IID --rm -p 9292:9292 ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
   environment:
     name: branch/$CI_COMMIT_REF_NAME
     url: http://$CI_ENVIRONMENT_SLUG.example.com
-  only:
-    - branches
-  except:
-    - master 
+  #only:
+  #  - branches
+  #except:
+  #  - master 
 
 staging:
   stage: stage
