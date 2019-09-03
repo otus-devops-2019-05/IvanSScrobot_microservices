@@ -36,6 +36,8 @@ test_unit_job:
   stage: test
   tags:
     - gce
+  before_script:
+    - docker info
   services:
     - mongo:latest
   script:
@@ -46,6 +48,8 @@ test_integration_job:
   stage: test
   tags:
     - gce
+  before_script:
+    - docker info
   script:
     - echo 'Testing 2'
     - hostname
