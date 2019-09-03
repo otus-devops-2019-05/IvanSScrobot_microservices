@@ -10,6 +10,7 @@ stages:
 variables:
   DATABASE_URL: 'mongodb://mongo/user_posts'
   DOCKER_TLS_CERTDIR: ''
+  
 
 before_script:
 #  - cd reddit
