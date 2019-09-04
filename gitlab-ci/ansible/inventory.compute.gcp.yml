@@ -3,7 +3,8 @@ projects:
   - docker-is           # Id of your gcp project
 
 groups:
-  gitlab: "'gitlab' in name"
+  gitlab-runner: "'gitlab-runner' in name"
+  gitlab-ci: "'gitlab-ci' in name"
 
 #hostnames:                # A list of options that describe the ordering for which hostnames should be assigned. Currently supported hostnames are 'public_ip', 'private_ip', or 'name'.
 #  - name

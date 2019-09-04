@@ -1,0 +1,103 @@
+image: ruby:2.4.2 
+
+stages:
+  - build
+  - test
+  - review
+  - stage
+  - production
+
+variables:
+  DATABASE_URL: 'mongodb://mongo/user_posts'
+
+
+before_script:
+  - cd reddit
+  - bundle install 
+
+
+build_job:
+  image: docker:19.03
+  stage: build
+  tags:
+    - docker-image
+  script:
+    - docker build -t reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ./reddit
+    - docker tag reddit-$CI_COMMIT_REF_NAME:$CI_PIPELINE_IID ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+    - docker login -u $DOCKER_LOGIN -p $DOCKER_PASS
+    - docker push ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+
+test_unit_job:
+  stage: test
+  tags:
+    - gce
+  before_script:
+    - docker info
+  script:
+    - hostname
+
+test_integration_job:
+  stage: test
+  tags:
+    - gce
+  before_script:
+    - docker info
+  script:
+    - echo 'Testing 2'
+    - hostname
+
+deploy_dev_job:
+  stage: review
+  tags:
+    - gce
+  script:
+    - echo 'Deploy'
+    - hostname
+  environment:
+    name: dev
+    url: http://dev.example.com
+
+branch review:
+  image: docker:19.03
+  stage: review
+  tags:
+    - docker-image
+  script: 
+    - echo 'CI_ENVIRONMENT_SLUG - '$CI_ENVIRONMENT_SLUG
+    - echo "Deploy to $CI_ENVIRONMENT_SLUG"
+    - docker run -d --name gitlab-reddit-$CI_COMMIT_REF_NAME-$CI_PIPELINE_IID --rm -p 9292:9292 ivansscrobot/gitlab-reddit:$CI_PIPELINE_IID
+  environment:
+    name: branch/$CI_COMMIT_REF_NAME
+    url: http://$CI_ENVIRONMENT_SLUG.example.com
+  #only:
+  #  - branches
+  #except:
+  #  - master 
+
+staging:
+  stage: stage
+  when: manual
+  tags:
+    - gce
+  #only:
+  #  - /^\d+\.\d+\.\d+/
+  script:
+   - echo 'Deploy'
+   - hostname
+  environment:
+    name: stage
+    url: https://beta.example.com 
+
+production:
+  stage: production
+  when: manual
+  tags:
+    - gce
+  #only:
+  #  - /^\d+\.\d+\.\d+/
+  script:
+   - echo 'Deploy'
+   - hostname
+  environment:
+    name: production
+    url: https://example.com

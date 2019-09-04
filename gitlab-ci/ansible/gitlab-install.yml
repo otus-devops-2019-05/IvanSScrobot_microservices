@@ -1,5 +1,5 @@
 ---
-- hosts: gitlab 
+- hosts: gitlab-ci 
   become: true
   vars:
     default_container_name: gitlab.example.com

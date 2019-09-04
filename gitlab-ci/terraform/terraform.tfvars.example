@@ -1,0 +1,6 @@
+project= "some project"
+public_key_path = "~/.ssh/someuser.pub"
+private_key_path = "~/.ssh/someuser"
+disk_image = "reddit-base" 
+app_name = "app_name"
+count_instance = "2"
