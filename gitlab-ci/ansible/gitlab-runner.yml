@@ -1,6 +1,6 @@
 ---
 # install gitlab runner
-- name: Install and registr gitlab-runner
+- name: Install and register gitlab-runner
   become: true
   hosts: gitlab_runner
   vars_files:
