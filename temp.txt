@@ -107,8 +107,16 @@ check_interval = 0
 3. Auto deploying runners
 
 Terraform  + ansible roles
+https://github.com/riemers/ansible-gitlab-runner
 
 ansible-galaxy install --roles-path . riemers.gitlab-runner 
 
 ansible-inventory -i inventory.compute.gcp.yml --graph
 ansible-playbook gitlab-runner.yml -i inventory.compute.gcp.yml
+
+
+4. Slack integration
+
+https://docs.gitlab.com/ee/user/project/integrations/slack.html
+
+https://app.slack.com/client/T6HR0TUP3/CKP31NMN3
