@@ -1,0 +1,85 @@
+---
+- hosts: gitlab-ci 
+  become: true
+  vars:
+    default_container_name: gitlab.example.com
+    default_gitlab_image: gitlab/gitlab-ce:latest 
+    default_runner_image: gitlab/gitlab-runner:latest 
+
+  tasks:
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools', 'python-pip', 'python-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+    
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      with_items:
+        - /srv/gitlab/config
+        - /srv/gitlab/data
+        - /srv/gitlab/logs  
+
+    # Pull gitlab image from the Docker Hub
+    - name: Pull gitlab Docker image
+      docker_image:
+        name: "{{ default_gitlab_image }}"
+        source: pull
+
+    # Pull runner image from the Docker Hub
+    - name: Pull runner Docker image
+      docker_image:
+        name: "{{ default_runner_image }}"
+        source: pull
+
+    # Creates gitlab container
+    - name: Create gitlab containers
+      docker_container:
+        name: "{{ default_container_name }}"
+        image: "{{ default_gitlab_image }}"
+        state: started
+        restart: yes
+        tty: yes
+        ports:
+          - "80:80"
+          - "443:443"
+          - "2222:22"
+        volumes:
+          - /srv/gitlab/config:/etc/gitlab
+          - /srv/gitlab/logs:/var/log/gitlab
+          - /srv/gitlab/data:/var/opt/gitlab
+        env:
+          GITLAB_OMNIBUS_CONFIG: external_url 'http://104.198.248.218'
+ 
+  # Creates runner container
+    - name: Create runner containers
+      docker_container:
+        name: gitlab-runner
+        image: "{{ default_runner_image }}"
+        state: started
+        restart: yes
+        tty: yes
+        volumes:
+          - /srv/gitlab-runner/config:/etc/gitlab-runner
+          - /var/run/docker.sock:/var/run/docker.sock

@@ -1,5 +1,108 @@
 # IvanSScrobot_microservices
 
+## HW#15 Gitlab-ci
+
+**1. Preparations and the main task:**
+
+Create a new instance in GCE and install Gitlab using [Omnibus package](https://docs.gitlab.com/omnibus/README.html). I use an ansible playbook (./gitlab/ansible/gitlab-install.yml) along with [gcp_compute](https://docs.ansible.com/ansible/latest/plugins/inventory/gcp_compute.html). The same playbook is responsible for the installation of ansible-runner. 
+
+In gitlab-ci.yml define ci pipeline (simple one, just to go through main features). It works after a commit to the gitlab repo is made, don't forget add this additional repo and push in it:
+```
+ git remote add gitlab http://<your-vm-ip>/homework/example.git 
+ git push gitlab gitlab-ci-1
+ ``` 
+Then, create gitlab runner inside a Docker container ([docs here](https://docs.gitlab.com/runner/install/docker.html)), and register a runner:
+```
+docker run -d --name gitlab-runner --restart always \
+-v /srv/gitlab-runner/config:/etc/gitlab-runner \
+-v /var/run/docker.sock:/var/run/docker.sock \
+gitlab/gitlab-runner:latest 
+
+docker exec -it gitlab-runner gitlab-runner register --run-untagged --locked=false
+```
+**2. Task with \*: in gitlab pipeline, build a container with our app**
+
+There are 3 ways to build a docker container inside a gitlab docker which runs a job (see [doc](https://docs.gitlab.com/ee/ci/docker/using_docker_build.html)). I used Docker socket binding. In this case, you don’t need to include the `docker:dind` service as when using the Docker in Docker executor. All you need is to register a runner properly:
+
+```
+sudo  docker exec -it gitlab-runner gitlab-runner registerr -n \
+  --url http://104.198.248.218/ \
+registration-token e8pyXzxMY8XTDxYZ5eDz\
+  --executor docker \
+  --description "Runner" \
+  --docker-image "alpine:latest" \
+  --docker-volumes /var/run/docker.sock:/var/run/docker.sock  \
+  --run-untagged \
+  --locked=false
+```
+*(the key option here is --docker-volumes)
+
+Then, add necessary instructions in .gitlab-ci.yml file. Look at examples in .gitlab-ci-additional_task.yml file: in build_job gitlab-ci makes an image and in branch_review runs an actual container.
+
+**3. Task with \*: automate installation and registering dozens of gitlab-ruuners**
+
+I divided this task into two parts:
+- creating GCE instances by Terraform and auto-deploying runners by Ansible
+- [autoscaling](https://docs.gitlab.com/runner/configuration/autoscale.html#overview)
+ 
+The first part is pretty straightforward: I use terraform for creating instances in my GCE project (directory 'terraform', variable node_count manages the number of instances) and Ansible for deploying gitlab-runners into the instances. inventory.compute.gcp.yml in directory ansible provides me with a dynamic inventory. As for Ansible, the easiest way I managed to find is to use a fully-fledged ready-to-cooK role [riemers.gitlab-runner](https://github.com/riemers/ansible-gitlab-runner) (instead of programming my own). Variables for the role are in ./ansible/vars/gitlab-runner-vars.yml, playbook is in ./ansible/gitlab-runner.yml
+
+Autoscaling, on the other hand, took me 3 days to compel gitlab to work in accordance with [this article](https://verkoyen.eu/blog/2018/08/scaling-gitlab-runner-on-google-cloud-platform), [this article](https://docs.gitlab.com/runner/executors/docker_machine.html#preparing-the-environment), and this [official doc](https://docs.gitlab.com/runner/configuration/autoscale.html). At first, I tried to run 'bastion' runner inside the docker container that I made earlier, see '1. Preparations and the main task' or [Run GitLab Runner in a container](https://docs.gitlab.com/runner/install/docker.html). I gave up in despair and install runner as a server with no wrapper around, but it didn't work either. Then, [here](https://forum.gitlab.com/t/failed-to-update-executor-docker-machine-for-9fb5fe99-no-free-machines-that-can-process-builds/3011/3) I found out this: 
+```
+since I have to invoke gitlab-runner as root using sudo, it also seems to create images using docker-machine as root as well, which makes the machines “invisible” to docker-machine when run as another user. It’s notable that the recommendations from docker seem to be never to run docker-machine as root. 
+```
+I started my gitlab-runner manually and - hurray! - it worked. My config.toml file (can be found in /srv/gitlab-runner/ or ~/.gitlab-runner/ looks like:
+
+```
+concurrent = 5
+check_interval = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "runner2"
+  url = "http://104.198.248.218/"
+  token = "Js-XFh_VyzvrJTPx9Gi9"
+  executor = "docker+machine"
+  [runners.custom_build_dir]
+  [runners.docker]
+    tls_verify = false
+    image = "alpine:latest"
+    privileged = false
+    disable_entrypoint_overwrite = false
+    oom_kill_disable = false
+    disable_cache = false
+    volumes = ["/cache"]
+    shm_size = 0
+  [runners.cache]
+    [runners.cache.s3]
+    [runners.cache.gcs]
+ [runners.machine]
+    IdleCount = 0
+    IdleTime = 600
+    MachineDriver = "google"
+    MachineName = "auto-scale-runner-%s"
+    MachineOptions = [
+      "google-project=docker-is",
+      "google-machine-type=f1-micro",
+      "google-tags=gitlab-ci-slave",
+      "google-preemptible=true",
+      "google-zone=europe-west1-c",
+      "google-use-internal-ip=true",
+      "google-machine-image=coreos-cloud/global/images/family/coreos-stable"
+    ]
+```
+Also, keep in mind that 'bastion' runner has to be registered with `--executor docker+machine` and docker-machine needs to know where to find credentials fot GCE, so create a proper .json file and run `export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gce-credentials.json`. By the way, for some reason, authentication didn't occur automatically via the built-in service account (as it described in [doc](https://docs.docker.com/machine/drivers/gce/)). 
+
+I didn't dive deeper and didn't combine autoscaling with auto-deploying.
+
+**4. Task with \*: integrate slack with gitlab**
+
+Just follow the official [documentation](https://docs.gitlab.com/ee/user/project/integrations/slack.html). The link to my Slack channel: https://app.slack.com/client/T6HR0TUP3/CKP31NMN3
+
+
+
 ## HW#14 Docker. Practice #4
 
 **1. Preparations and the main task:**
