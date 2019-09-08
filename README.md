@@ -1,5 +1,12 @@
 # IvanSScrobot_microservices
 
+## HW#16 monitoring-1
+
+https://devconnected.com/mongodb-monitoring-with-grafana-prometheus/
+https://github.com/percona/mongodb_exporter
+
+
+
 ## HW#15 Gitlab-ci
 
 **1. Preparations and the main task:**
