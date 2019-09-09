@@ -32,7 +32,6 @@ services:
       - '9090:9090'
     volumes:
       - prometheus_data:/prometheus
-      #- /home/ivan/git/IvanSScrobot_microservices/monitoring/prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
