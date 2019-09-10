@@ -5,6 +5,10 @@
 https://devconnected.com/mongodb-monitoring-with-grafana-prometheus/
 https://github.com/percona/mongodb_exporter
 
+https://medium.com/the-telegraph-engineering/how-prometheus-and-the-blackbox-exporter-makes-monitoring-microservice-endpoints-easy-and-free-of-a986078912ee
+
+https://github.com/prometheus/blackbox_exporter
+debugging https://rtfm.co.ua/en/prometheus-blackbox-exporter-probe_http_status_code-0-and-its-debug/
 
 
 ## HW#15 Gitlab-ci
