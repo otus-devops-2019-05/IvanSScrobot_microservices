@@ -1,0 +1,15 @@
+modules:
+  http_2xx:
+    prober: http
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+      preferred_ip_protocol: ip4
+  icmp:
+    prober: icmp
+    icmp:
+      preferred_ip_protocol: ip4    

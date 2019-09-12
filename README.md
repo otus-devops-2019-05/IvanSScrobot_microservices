@@ -1,5 +1,87 @@
 # IvanSScrobot_microservices
 
+## HW#16 monitoring-1
+
+**1. Preparations and the main task:**
+Create a new instance in GCE and install there docker-machine. Inside the instance, run Prometheus in a container:
+```
+docker run --rm -p 9090:9090 -d --name prometheus prom/prometheus:v2.1.0 
+```
+Make our own docker image based on `prom/prometheus:v2.1.0 ` and add prometheus.yml in /etc/prometheus/. Rebuild our applications (ui, post-py, comment) and run them with docker-compose. Since the apps provide /metrics in the proper format (e.g. http://35.205.31.224:9292/metrics), Prometheus scrapes them without any additional exporters. Also, install [node exporter](https://github.com/prometheus/node_exporter) in order to collect OS metrics.
+
+**2. Task with \*:  add MongoDB exporter**
+
+I downloaded the latest release of [mongodb_exporter](https://github.com/percona/mongodb_exporter), just because I didn't find anything else for this purpose, and run it a dedicated container (Dockerfile is in ./monitoring/mongoexporter/). Mongodb_exporter uses 9216 port by default, so add following code in prometheus.yml:
+```
+- job_name: 'mongo'
+    static_configs:
+      - targets:
+        - 'mongo-exporter:9216'
+```
+
+NB - don't forget about `ENV MONGODB_URI='mongodb://post_db:27017'`, which passes the exporter the address of MongoDB installation.
+
+**3. Task with \*:  add Blackbox exporter**
+
+Again, download the latest release from [github](https://github.com/prometheus/blackbox_exporter), run it in another container, the Dockerfile is in ./monitoring/blackboxexporter/. `blackbox.yml` is responsible for the exporter configuration. In my case, it's needed to switch IP protocol to the 4th version:
+```
+modules:
+  http_2xx:
+    prober: http
+    http:
+      method: GET
+      preferred_ip_protocol: ip4
+  icmp:
+    prober: icmp
+    icmp:
+      preferred_ip_protocol: ip4   
+```
+Also, it's worth mentioning that in prometheus.yml I have to write a separate section for every 'prober'. For example, below is the job for the ICMP probe which pings two targets:
+```
+  - job_name: 'blackbox_icmp'
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    static_configs:
+      - targets: 
+        - comment
+        - post
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115 # Blackbox exporter.
+```
+
+**4. Task with \*:  create Makefile for all docker images I used**
+
+My Makefile is in the ./monitoring. If `make` is run without arguments, it builds all needed images. Also, it can be run as `make push` for pushing all images on Docker Hub. As I didn't implement Docker Hub autorization inside Makefile, it should be done before running the `make` command. Below is the part of Makefile:
+```
+build : blackboxexporter_build mongoexporter_build prometheus_build ui comment post
+push : blackboxexporter_push mongoexporter_push prometheus_push ui_push comment_push post_push
+
+.PHONY : build
+
+USER_NAME := ivansscrobot
+
+blackboxexporter_build : 
+	docker build -t $(USER_NAME)/blackbox ./blackboxexporter
+blackboxexporter_push : 	
+	docker push $(USER_NAME)/blackbox
+
+mongoexporter_build : 	
+	docker build -t $(USER_NAME)/mongoexporter ./mongoexporter
+mongoexporter_push :	
+	docker push $(USER_NAME)/mongoexporter
+
+prometheus_build : 
+	docker build -t $(USER_NAME)/prometheus ./prometheus
+prometheus_push : 
+	docker push $(USER_NAME)/prometheus
+  ```
+
 ## HW#15 Gitlab-ci
 
 **1. Preparations and the main task:**
