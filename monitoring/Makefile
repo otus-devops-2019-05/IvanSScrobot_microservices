@@ -1,5 +1,5 @@
-build : blackboxexporter_build mongoexporter_build prometheus_build ui comment post
-push : blackboxexporter_push mongoexporter_push prometheus_push ui_push comment_push post_push
+build : blackboxexporter_build mongoexporter_build prometheus_build ui comment post alertmanager_build
+push : blackboxexporter_push mongoexporter_push prometheus_push ui_push comment_push post_push alertmanager_push
 
 .PHONY : build
 
@@ -19,6 +19,11 @@ prometheus_build :
 	docker build -t $(USER_NAME)/prometheus ./prometheus
 prometheus_push : 
 	docker push $(USER_NAME)/prometheus
+
+alertmanager_build : 
+	docker build -t $(USER_NAME)/alertmanager ./alertmanager
+alertmanager_push : 
+	docker push $(USER_NAME)/alertmanager	
 
 ui : 
 	echo `git show --format="%h" HEAD | head -1` > ../src/ui/build_info.txt

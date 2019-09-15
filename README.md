@@ -1,5 +1,54 @@
 # IvanSScrobot_microservices
 
+## HW#17 monitoring-2
+
+**1. Preparations and the main task:**
+
+Install [cAdvisor](https://github.com/google/cadvisor) - running daemon that collects and provides information about docker containers. Add new section into `scrape_configs:` part of prometheus.yml:
+```
+- job_name: 'cadvisor'
+    static_configs:
+      - targets:
+        - 'cadvisor:8080'
+```
+
+Grafana
+
+Add a new container in docker-compose-monitoring.yml:
+```
+grafana:
+    image: grafana/grafana:5.0.0
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+```
+Add prometheus as a datasource and import dashboards from https://grafana.com/grafana/dashboards. Then, create couple dashboards and tweak them (use functions 'rate()', 'histogram_quantile()'). 
+
+Build new container for Alertmanager (additional component for Prometheus):
+```
+FROM prom/alertmanager:v0.14.0
+ADD config.yml /etc/alertmanager/
+```
+In config.yml for alertmanager, define notifications to my Slack channel (use Slack Incoming Webhooks). In .\monitoring\prometheus\alerts.yml define rules for alerts, and in prometheus.yml add 
+```
+rule_files:
+  - "alerts.yml"
+```
+
+**2. Task with \*: scrape metrics from Docker directly and with Telegraf**
+
+https://docs.docker.com/config/thirdparty/prometheus/
+
+https://github.com/influxdata/telegraf/tree/master/plugins/inputs/docker
+https://docs.docker.com/samples/library/telegraf/
+
+
 ## HW#16 monitoring-1
 
 **1. Preparations and the main task:**
