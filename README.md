@@ -30,7 +30,7 @@ grafana:
 ```
 Add prometheus as a datasource and import dashboards from https://grafana.com/grafana/dashboards. Then, create couple dashboards and tweak them (use functions 'rate()', 'histogram_quantile()'). 
 
-Build a new container for Alertmanager (additional component for Prometheus):
+Build a new container for __[Alertmanager](https://prometheus.io/docs/alerting/alertmanager/)__ (additional component for Prometheus):
 ```
 FROM prom/alertmanager:v0.14.0
 ADD config.yml /etc/alertmanager/
