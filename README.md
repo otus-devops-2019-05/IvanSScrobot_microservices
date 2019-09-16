@@ -4,7 +4,7 @@
 
 **1. Preparations and the main task:**
 
-Install [cAdvisor](https://github.com/google/cadvisor) - running daemon that collects and provides information about docker containers. Add new section into `scrape_configs:` part of prometheus.yml:
+Install [cAdvisor](https://github.com/google/cadvisor) - running daemon that collects and provides information about docker containers. Add new section into `scrape_configs` part of prometheus.yml:
 ```
 - job_name: 'cadvisor'
     static_configs:
@@ -12,7 +12,7 @@ Install [cAdvisor](https://github.com/google/cadvisor) - running daemon that col
         - 'cadvisor:8080'
 ```
 
-Grafana
+__[Grafana](https://grafana.com/)__
 
 Add a new container in docker-compose-monitoring.yml:
 ```
@@ -30,24 +30,53 @@ grafana:
 ```
 Add prometheus as a datasource and import dashboards from https://grafana.com/grafana/dashboards. Then, create couple dashboards and tweak them (use functions 'rate()', 'histogram_quantile()'). 
 
-Build new container for Alertmanager (additional component for Prometheus):
+Build a new container for Alertmanager (additional component for Prometheus):
 ```
 FROM prom/alertmanager:v0.14.0
 ADD config.yml /etc/alertmanager/
 ```
-In config.yml for alertmanager, define notifications to my Slack channel (use Slack Incoming Webhooks). In .\monitoring\prometheus\alerts.yml define rules for alerts, and in prometheus.yml add 
+In config.yml for alertmanager, define notifications to my Slack channel (use Slack Incoming Webhooks). In .\monitoring\prometheus\alerts.yml define rules for alerts, and in prometheus.yml add kinda link to these alert rules:
 ```
 rule_files:
   - "alerts.yml"
 ```
+That's it, now just rebuild and redeploy containers running `docker-compose up -d`.
 
 **2. Task with \*: scrape metrics from Docker directly and with Telegraf**
 
-https://docs.docker.com/config/thirdparty/prometheus/
+Add building and pushing Alertmanager image in my Makefile:
+```
+alertmanager_build : 
+	docker build -t $(USER_NAME)/alertmanager ./alertmanager
+alertmanager_push : 
+	docker push $(USER_NAME)/alertmanager	
+```  
 
-https://github.com/influxdata/telegraf/tree/master/plugins/inputs/docker
-https://docs.docker.com/samples/library/telegraf/
+Collect Docker metrics with Prometheus directly, using [Docker experimental mode](https://docs.docker.com/config/thirdparty/prometheus/). Add new job 'docker' in prometheus.yml and in /etc/docker/daemon.json past following:
+```
+{
+  "metrics-addr" : "0.0.0.0:9323",
+  "experimental" : true
+}
+```
+At this time, cAdviser wins 'docker as direct Prometheus target' hand down. The latter provides a few confusing metrics, and it's still not recommended for production.
 
+__[Telegraf](https://grafana.com/)__
+
+Telegraf collects various metrics and provide them for different systems. It has [docker input](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/docker) and [Prometheus output](https://github.com/influxdata/telegraf/tree/master/plugins/outputs/prometheus_client) (also, see docs [here](https://docs.docker.com/samples/library/telegraf/)). In a nutshell, we describe inputs and outputs in telegraf.conf:
+```
+[[outputs.prometheus_client]]
+    listen = ":9273"
+[[inputs.docker]]
+     endpoint = "unix:///var/run/docker.sock"
+``` 
+and add 'telegraf' job in prometheus.yml:
+```
+- job_name: 'telegraf'
+    static_configs:
+      - targets:
+        - 'telegraf:9273'
+```
 
 ## HW#16 monitoring-1
 

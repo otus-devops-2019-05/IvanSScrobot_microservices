@@ -9,3 +9,4 @@ receivers:
   slack_configs:
   - channel: '#ivan_scrobot'
   - send_resolved: true
+
