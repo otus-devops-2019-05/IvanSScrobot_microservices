@@ -1,5 +1,50 @@
 # IvanSScrobot_microservices
 
+## HW#18 logging-1
+
+**1. Preparations and the main task:**
+
+Create a new host in GCE:
+```
+$ docker-machine create --driver google \
+    --google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
+    --google-machine-type n1-standard-1 \
+    --google-open-port 5601/tcp \
+    --google-open-port 9292/tcp \
+    --google-open-port 9411/tcp \
+    logging
+
+$ eval $(docker-machine env logging)
+```
+In ./docker/docker-compose-logging.yml describe our 'logging infrastructure', in ./logging/fluentd put fluent.conf and Dockerfile for our fluentd image. {An article](https://habr.com/ru/company/selectel/blog/250969/) about Fluentd basics on Habr.com. [Docs](https://docs.fluentd.org/filter/parser) for FluentD parser plugin.
+
+**2. Task with \*: parallel parsing logs in FluentD**
+
+Tricky task. In v0.12 this structure works, but it may not be suitable for other versions:
+```
+<filter service.ui>
+  @type parser
+  key_name message
+  format grok
+  <grok>
+    pattern service=%{WORD:service} \| event=%{WORD:event} \| request_id=%{GREEDYDATA:request_id} \| message='%{GREEDYDATA:message}'
+  </grok>
+  <grok>
+    pattern service=%{WORD:service} \| event=%{WORD:event} \| path=%{URIPATH:path} \| request_id=%{GREEDYDATA:request_id} \| remote_addr=%{IP:remote_addr} \| method=%{GREEDYDATA:method} \| response_status=%{INT:response_status}
+  </grok>
+</filter>
+```
+
+See Grok datatypes [here](https://streamsets.com/documentation/controlhub/latest/help/datacollector/UserGuide/Apx-GrokPatterns/GrokPatterns_title.html).
+
+**3. Task with \*: Zipkin**
+
+Download "broken application" by running command `svn export https://github.com/Artemmkin/bugged-code/trunk/`. Then, in ./docker/.env change UI_TAG from 'logging to 'latest', add environments in ./docker/docker-compose.yml, rebuild docker images in ./src, and set up the whole app by running `docker-compose up -d`.
+
+In zipkin I can see that the longest span is one named "post: db_find_single_post".  Look up for this: `find ./ -type f -exec grep -H 'db_find_single_post' {} \;`, and find it in `./post-py/post_app.py`. Finally, in this file find the line `time.sleep(3)` - the very cause of the problem.
+
+
+
 ## HW#17 monitoring-2
 
 **1. Preparations and the main task:**
@@ -59,7 +104,7 @@ Collect Docker metrics with Prometheus directly, using [Docker experimental mode
   "experimental" : true
 }
 ```
-At this time, cAdviser wins 'docker as direct Prometheus target' hand down. The latter provides a few confusing metrics, and it's still not recommended for production.
+At this time, cAdviser wins 'docker as direct Prometheus target' hands down. The latter provides a few confusing metrics, and it's still not recommended for production.
 
 __[Telegraf](https://grafana.com/)__
 
@@ -77,6 +122,9 @@ and add 'telegraf' job in prometheus.yml:
       - targets:
         - 'telegraf:9273'
 ```
+
+-----------------
+Если будет желание вернуться к заданию с Autoheal-ом, то в его репозитории есть примеры работы с заглушкой AWX-а: https://github.com/openshift/autoheal/tree/master/examples
 
 ## HW#16 monitoring-1
 
