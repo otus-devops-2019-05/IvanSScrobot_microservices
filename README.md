@@ -16,7 +16,7 @@ $ docker-machine create --driver google \
 
 $ eval $(docker-machine env logging)
 ```
-In ./docker/docker-compose-logging.yml describe our 'logging infrastructure', in ./logging/fluentd put fluent.conf and Dockerfile for our fluentd image. {An article](https://habr.com/ru/company/selectel/blog/250969/) about Fluentd basics on Habr.com. [Docs](https://docs.fluentd.org/filter/parser) for FluentD parser plugin.
+In ./docker/docker-compose-logging.yml describe our 'logging infrastructure', which is Fluentd + ElasticSearh + Kibana. In ./logging/fluentd put fluent.conf and Dockerfile for the fluentd image. [An article](https://habr.com/ru/company/selectel/blog/250969/) about Fluentd basics on Habr.com. [Docs](https://docs.fluentd.org/filter/parser) for FluentD parser plugin.
 
 **2. Task with \*: parallel parsing logs in FluentD**
 
