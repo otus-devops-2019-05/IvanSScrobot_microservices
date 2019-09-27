@@ -1,8 +1,8 @@
-# FROM python:3.6.0-alpine
-FROM python:2.7
+FROM python:3.6.0-alpine
 WORKDIR /app
-ADD requirements.txt /app
-RUN pip install -r requirements.txt
 ADD . /app
-EXPOSE  5000
-ENTRYPOINT ["python", "post_app.py"]
+RUN apk add --update gcc python python-dev py-pip build-base
+RUN pip install -r /app/requirements.txt
+ENV POST_DATABASE_HOST post_db
+ENV POST_DATABASE posts
+CMD ["python3", "post_app.py"]
