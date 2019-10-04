@@ -1,5 +1,11 @@
 # IvanSScrobot_microservices
 
+## HW#19 kubernetes-1
+
+Following [Otus' fork of kubernetes-the-hard-way](https://github.com/express42/kubernetes-the-hard-way/tree/master/docs) (original is [here](https://github.com/kelseyhightower/kubernetes-the-hard-way)), I set Kubernetes up. All files created along the way are in ./kubernetes/the_hard_way.
+
+I made manifests for components of the app and placed them in ./kubernetes/reddit 
+
 ## HW#18 logging-1
 
 **1. Preparations and the main task:**
